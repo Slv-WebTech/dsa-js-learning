@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DSA JS Learning Journey</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="Algorithms.js"></script>
+</head>
+
+<body>
+
+    <div class="wrapper container-fluid py-3 px-3">
+
+        <!-- Hero -->
+        <div class="hero-section mb-4">
+            <div class="hero-glow"></div>
+            <h1 class="hero-title">DSA + JavaScript Learning Journey 🚀</h1>
+            <p class="hero-subtitle">Learn concepts. Solve problems. Write code. Test logic. Revise faster.</p>
+            <div class="hero-flow">
+                <span>Learn</span><span>→</span><span>Code</span><span>→</span>
+                <span>Test</span><span>→</span><span>Revise</span><span>→</span><span>Repeat</span>
+            </div>
+            <div class="hero-words">
+                <span>Logic</span><span>Focus</span><span>Consistency</span><span>Debug</span>
+                <span>Think</span><span>Practice</span><span>Grow</span><span>Mastery</span>
+            </div>
+        </div>
+
+        <!-- Chips Navigation Bar -->
+        <div class="chips-bar mb-4">
+            <div class="chips-nav" id="chipsNav"><!-- injected by JS --></div>
+            <div class="chips-actions">
+                <button class="chip chip-action chip-open" id="openFileBtn" title="Load topics.json from disk">📂 Open
+                    JSON</button>
+                <button class="chip chip-action chip-save" id="saveFileBtn" title="Save topics to topics.json">💾 Save
+                    JSON</button>
+                <button class="chip chip-action chip-add" id="openFormBtn" title="Add a new topic card">＋ Add
+                    Topic</button>
+            </div>
+        </div>
+
+        <!-- Topics rendered here -->
+        <div class="row g-4" id="topics-container"></div>
+
+    </div>
+
+    <!-- ── Add Topic Modal ───────────────────────────────────────────── -->
+    <div class="modal-overlay" id="formModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Add New Topic</h3>
+                <button class="modal-close" id="closeModalBtn" type="button">✕</button>
+            </div>
+            <form id="topicForm">
+                <div class="form-group">
+                    <label for="f-title">Title <span class="req">*</span></label>
+                    <input id="f-title" type="text" placeholder="e.g. Two Sum Problem" required>
+                </div>
+                <div class="form-group">
+                    <label for="f-concept">
+                        Concept
+                        <span class="hint">— HTML allowed: &lt;strong&gt;, &lt;br&gt;, &lt;p&gt;</span>
+                    </label>
+                    <textarea id="f-concept" rows="5" placeholder="Explain the concept..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="f-code">Code</label>
+                    <textarea id="f-code" rows="9" class="mono" placeholder="// paste your code here"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="f-output">Output / Notes</label>
+                    <textarea id="f-output" rows="5" class="mono"
+                        placeholder="Expected output and key takeaways..."></textarea>
+                </div>
+                <div class="form-footer">
+                    <button type="button" id="cancelFormBtn">Cancel</button>
+                    <button type="submit" class="btn-save">Save Topic</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── Toast notification ───────────────────────────────────────── -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ════════════════════════════════════════════════════════════════
+        //  DEFAULT SEED DATA  (used only when no topics.json is loaded)
+        // ════════════════════════════════════════════════════════════════
+        const DEFAULT_TOPICS = [
+            {
+                title: "var vs let vs const",
+                concept: `
+            Variables differ by scope and reassignment.<br><br>
+            <strong>const</strong> → default (immutable binding)<br>
+            <strong>let</strong>   → use when value changes<br>
+            <strong>var</strong>   → avoid (legacy)
+            <p><strong>var</strong> is function-scoped; <strong>let</strong> &amp;
+            <strong>const</strong> are block-scoped — safer from bugs.</p>
+            <p>All three are hoisted, but <strong>let</strong> / <strong>const</strong>
+            stay in the <strong>Temporal Dead Zone</strong> until declared.</p>
+        `,
+                code:
+                    `var name  = "JS";
+let count = 1;
+count = 2;          // OK — let allows reassign
+const pi  = 3.14;
+// pi = 3;          // ❌ TypeError — const is fixed
+
+if (true) {
+  let block = "scoped";
+}
+// console.log(block); ❌ ReferenceError`,
+                output:
+                    `✔ const  — default choice
+✔ let    — use in loops / counters
+✔ var    — avoid (function-scope trap)
+
+Hoisting:
+  var   → undefined  (no error, but risky)
+  let   → TDZ crash  if used before line
+  const → TDZ crash  if used before line
+
+Tip: prefer  const > let > var`
+            },
+            {
+                title: "Sum of Two Numbers",
+                concept: `
+            The <strong>+</strong> operator behaves differently by type.<br><br>
+            <strong>Number + Number</strong> → arithmetic addition<br>
+            <strong>String + String</strong> → concatenation (joins text)
+            <p>Use <strong>Number()</strong> or <strong>parseInt()</strong>
+            to convert a string to a number before adding.</p>
+        `,
+                code:
+                    `let a = 10, b = 5;
+console.log(a + b);              // 15
+
+let x = "10", y = "5";
+console.log(x + y);              // "105"
+
+// Fix: convert string → number first
+console.log(Number(x) + Number(y));     // 15
+console.log(parseInt(x) + parseInt(y)); // 15`,
+                output:
+                    `15
+105
+15
+15
+
+✔ number + number = addition
+✔ string + string = concatenation
+✔ Number() / parseInt() to convert
+
+Tip: always check types before adding`
+            },
+            {
+                title: "if / else — Conditional Logic",
+                concept: `
+            Run different code depending on whether a condition is
+            <strong>true</strong> or <strong>false</strong>.<br><br>
+            <strong>if</strong>      → runs when condition is true<br>
+            <strong>else if</strong> → checks another condition<br>
+            <strong>else</strong>    → fallback when nothing matched
+            <p>Conditions use comparison operators:
+            <strong>===</strong> (strict equal), <strong>&gt;</strong>,
+            <strong>&lt;</strong>, <strong>&gt;=</strong>, <strong>&lt;=</strong>,
+            <strong>!==</strong></p>
+            <p>Always prefer <strong>===</strong> over <strong>==</strong>
+            to avoid type-coercion surprises.</p>
+        `,
+                code:
+                    `const score = 72;
+
+if (score >= 90) {
+  console.log("Grade: A");
+} else if (score >= 75) {
+  console.log("Grade: B");
+} else if (score >= 60) {
+  console.log("Grade: C");
+} else {
+  console.log("Grade: F");
+}
+
+// strict vs loose equality
+console.log(0 == "0");   // true  ⚠ type coercion
+console.log(0 === "0");  // false ✔ strict`,
+                output:
+                    `Grade: C
+
+true
+false
+
+✔ === checks value AND type
+✔ ==  converts types first (avoid)
+
+Tip: score >= 60 matched, so
+     remaining else-if blocks skipped`
+            },
+            {
+                title: "Data Types in JavaScript",
+                concept: `
+            JS has <strong>7 primitive</strong> types and <strong>1 non-primitive</strong>.<br><br>
+            <strong>Primitives</strong> (stored by value):<br>
+            Number, String, Boolean, null, undefined, Symbol, BigInt<br><br>
+            <strong>Non-primitive</strong> (stored by reference):<br>
+            Object — arrays and functions are also objects.
+            <p>Use <strong>typeof</strong> to check a value's type at runtime.</p>
+            <p><strong>null</strong> = known empty &nbsp;|&nbsp; <strong>undefined</strong> = declared but not assigned.</p>
+        `,
+                code:
+                    `let num  = 42;
+let str  = "hello";
+let bool = true;
+let n    = null;
+let u    = undefined;
+let arr  = [1, 2, 3];
+let obj  = { a: 1 };
+
+console.log(typeof num);         // "number"
+console.log(typeof str);         // "string"
+console.log(typeof bool);        // "boolean"
+console.log(typeof n);           // "object" ⚠ JS quirk
+console.log(typeof u);           // "undefined"
+console.log(typeof arr);         // "object"
+console.log(Array.isArray(arr)); // true`,
+                output:
+                    `number
+string
+boolean
+object      ← typeof null === "object" (JS bug)
+undefined
+object
+true
+
+Tip: use Array.isArray() to detect arrays
+     use val === null  to detect null`
+            },
+            {
+                title: "Type Conversion",
+                concept: `
+            JS converts types <strong>implicitly</strong> (auto/coercion) or
+            <strong>explicitly</strong> (you control it).<br><br>
+            <strong>Number()</strong>    → converts to number<br>
+            <strong>String()</strong>    → converts to string<br>
+            <strong>Boolean()</strong>   → converts to boolean<br>
+            <strong>parseInt()</strong>  → string → whole number<br>
+            <strong>parseFloat()</strong>→ string → decimal
+            <p><strong>Falsy</strong> values (become false):
+            <code>0 &nbsp;"" &nbsp;null &nbsp;undefined &nbsp;NaN &nbsp;false</code><br>
+            Everything else is <strong>truthy</strong>.</p>
+        `,
+                code:
+                    `// Implicit coercion — JS surprises
+console.log("5" + 1);     // "51"  (+ prefers string)
+console.log("5" - 1);     // 4     (- forces number)
+console.log(true + 1);    // 2     (true = 1)
+console.log(false + 1);   // 1     (false = 0)
+
+// Explicit conversion
+console.log(Number("42"));   // 42
+console.log(Number(""));     // 0
+console.log(Number("abc"));  // NaN
+console.log(String(99));     // "99"
+console.log(Boolean(0));     // false
+console.log(Boolean("hi"));  // true
+
+// Falsy check
+if (!0)    console.log("0 is falsy");
+if (!"")   console.log("empty string is falsy");
+if (!null) console.log("null is falsy");`,
+                output:
+                    `"51"
+4
+2
+1
+42
+0
+NaN
+"99"
+false
+true
+0 is falsy
+empty string is falsy
+null is falsy
+
+Falsy:  0  ""  null  undefined  NaN  false
+Truthy: everything else (even "0" and [])`
+            },
+            {
+                title: "Loops — for, while, for...of, for...in",
+                concept: `
+            Loops repeat a block of code.<br><br>
+            <strong>for</strong>      → when you know the count upfront<br>
+            <strong>while</strong>    → when count depends on a condition<br>
+            <strong>for...of</strong> → iterate over array / string values<br>
+            <strong>for...in</strong> → iterate over object keys
+            <p><strong>break</strong> — exit the loop immediately.<br>
+            <strong>continue</strong> — skip current iteration, keep looping.</p>
+        `,
+                code:
+                    `// for loop
+for (let i = 0; i < 3; i++) {
+  console.log("i =", i);
+}
+
+// while loop
+let n = 3;
+while (n > 0) { console.log("n =", n); n--; }
+
+// for...of — array values
+const colors = ["red", "green", "blue"];
+for (const c of colors) console.log(c);
+
+// for...in — object keys
+const obj = { a: 1, b: 2 };
+for (const key in obj) console.log(key, ":", obj[key]);
+
+// break & continue
+for (let i = 0; i < 6; i++) {
+  if (i === 2) continue; // skip 2
+  if (i === 5) break;    // stop at 5
+  console.log(i);
+}`,
+                output:
+                    `i = 0  i = 1  i = 2
+n = 3  n = 2  n = 1
+red    green  blue
+a : 1  b : 2
+0  1  3  4
+
+Tip: for...of is cleaner than index
+     loops for most array work`
+            },
+            {
+                title: "Functions — Declaration, Expression, Arrow",
+                concept: `
+            Functions are reusable named blocks of code.<br><br>
+            <strong>Declaration</strong>    → hoisted, callable before its line<br>
+            <strong>Expression</strong>     → stored in variable, not hoisted<br>
+            <strong>Arrow function</strong> → shorter syntax, no own <em>this</em>
+            <p><strong>Parameters</strong> = inputs &nbsp;|&nbsp;
+            <strong>return</strong> = output.<br>
+            Without return the function gives back <strong>undefined</strong>.</p>
+            <p><strong>Default parameters</strong> provide a fallback value.</p>
+        `,
+                code:
+                    `// Declaration (hoisted)
+function add(a, b) { return a + b; }
+console.log(add(3, 4));      // 7
+
+// Expression (not hoisted)
+const multiply = function(a, b) { return a * b; };
+console.log(multiply(3, 4)); // 12
+
+// Arrow — implicit return for single expressions
+const square = n => n * n;
+const greet  = name => "Hello " + name;
+console.log(square(5));      // 25
+console.log(greet("DSA"));   // Hello DSA
+
+// Default parameter
+function power(base, exp = 2) {
+  return base ** exp;
+}
+console.log(power(3));       // 9
+console.log(power(2, 10));   // 1024`,
+                output:
+                    `7
+12
+25
+Hello DSA
+9
+1024
+
+Tip: arrow functions are perfect for
+     short callbacks:
+  arr.map(x => x * 2)
+  arr.filter(x => x > 0)`
+            },
+            {
+                title: "Arrays — Basics &amp; Core Methods",
+                concept: `
+            An array stores an <strong>ordered list</strong> of values. Index starts at <strong>0</strong>.<br><br>
+            <strong>push(x)</strong>    → add to end &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;O(1)<br>
+            <strong>pop()</strong>      → remove from end &nbsp;&nbsp;O(1)<br>
+            <strong>unshift(x)</strong> → add to front &nbsp;&nbsp;&nbsp;&nbsp;O(n)<br>
+            <strong>shift()</strong>    → remove from front &nbsp;O(n)<br>
+            <strong>indexOf(x)</strong> → find position &nbsp;&nbsp;&nbsp;&nbsp;O(n)<br>
+            <strong>includes(x)</strong>→ true/false check &nbsp;&nbsp;O(n)<br>
+            <strong>slice(s,e)</strong> → copy portion &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;O(n)<br>
+            <strong>splice(s,n)</strong>→ remove / insert &nbsp;&nbsp;&nbsp;O(n)<br>
+            <strong>sort(fn)</strong>   → sorts in-place &nbsp;&nbsp;&nbsp;&nbsp;O(n log n)<br>
+            <strong>reverse()</strong>  → reverses in-place &nbsp;&nbsp;O(n)
+        `,
+                code:
+                    `const nums = [3, 1, 4, 1, 5, 9];
+
+nums.push(2);            // add to end
+nums.unshift(0);         // add to front
+console.log(nums);
+
+nums.pop();              // remove from end
+nums.shift();            // remove from front
+console.log(nums);
+
+console.log(nums.indexOf(4));   // 2
+console.log(nums.includes(9));  // true
+console.log(nums.slice(1, 4));  // copy indices 1–3
+
+nums.splice(2, 2);       // remove 2 items at index 2
+console.log(nums);
+
+// Sort — always pass comparator for numbers!
+const sorted = [...nums].sort((a, b) => a - b);
+console.log(sorted);`,
+                output:
+                    `[0, 3, 1, 4, 1, 5, 9, 2]
+[3, 1, 4, 1, 5, 9]
+2
+true
+[1, 4, 1]
+[3, 1, 5, 9]
+[1, 3, 5, 9]
+
+Tip: [...arr] copies before sort/reverse
+     so original stays unchanged`
+            },
+            {
+                title: "Array Methods — map, filter, find, reduce, forEach",
+                concept: `
+            Higher-order methods that loop and transform arrays cleanly.<br><br>
+            <strong>forEach</strong>   → loop for side effects, no return value<br>
+            <strong>map</strong>       → transform every item → new array<br>
+            <strong>filter</strong>    → keep items that pass a test → new array<br>
+            <strong>find</strong>      → first item that passes a test<br>
+            <strong>findIndex</strong> → index of first match<br>
+            <strong>reduce</strong>    → collapse array to a single value<br>
+            <strong>some</strong>      → true if ANY item passes<br>
+            <strong>every</strong>     → true if ALL items pass
+            <p>None of these mutate the original array.</p>
+        `,
+                code:
+                    `const nums = [1, 2, 3, 4, 5];
+
+const doubled = nums.map(n => n * 2);
+console.log(doubled);           // [2,4,6,8,10]
+
+const evens = nums.filter(n => n % 2 === 0);
+console.log(evens);             // [2,4]
+
+const first = nums.find(n => n > 3);
+console.log(first);             // 4
+
+const idx = nums.findIndex(n => n > 3);
+console.log(idx);               // 3
+
+const sum = nums.reduce((acc, n) => acc + n, 0);
+console.log(sum);               // 15
+
+console.log(nums.some(n => n > 4));  // true
+console.log(nums.every(n => n > 0)); // true
+
+// Chain: squares of even numbers
+const result = nums.filter(n => n%2 === 0).map(n => n*n);
+console.log(result);            // [4, 16]`,
+                output:
+                    `[2, 4, 6, 8, 10]
+[2, 4]
+4
+3
+15
+true
+true
+[4, 16]
+
+Tip: chaining map+filter+reduce
+     replaces most manual loops`
+            },
+            {
+                title: "Objects — Key-Value Pairs",
+                concept: `
+            Objects store data as <strong>key: value</strong> pairs (like a dictionary).<br><br>
+            <strong>Dot notation</strong>     → obj.key &nbsp;(preferred)<br>
+            <strong>Bracket notation</strong> → obj["key"] (for dynamic keys)<br><br>
+            Useful built-ins:<br>
+            <strong>Object.keys(o)</strong>    → array of keys<br>
+            <strong>Object.values(o)</strong>  → array of values<br>
+            <strong>Object.entries(o)</strong> → array of [key, value] pairs
+            <p>In DSA, objects are used as <strong>hash maps</strong> for O(1) lookups
+            and <strong>frequency counters</strong> — a very common pattern.</p>
+        `,
+                code:
+                    `const person = { name: "Alice", age: 25, city: "Delhi" };
+
+console.log(person.name);       // Alice
+console.log(person["age"]);     // 25
+
+person.age  = 26;               // update
+person.lang = "JavaScript";     // add new key
+delete person.city;             // remove key
+
+console.log(Object.keys(person));
+console.log(Object.values(person));
+
+// Frequency counter — very common DSA pattern
+const str = "banana";
+const freq = {};
+for (const ch of str) {
+  freq[ch] = (freq[ch] || 0) + 1;
+}
+console.log(freq);`,
+                output:
+                    `Alice
+25
+["name","age","lang"]
+["Alice",26,"JavaScript"]
+{ b:1, a:3, n:2 }
+
+Frequency counter: O(n) time
+  vs checking every pair: O(n²)
+
+Common use:
+  - count chars in a string
+  - find duplicates
+  - anagram checks`
+            },
+            {
+                title: "Strings &amp; String Methods",
+                concept: `
+            Strings are <strong>immutable</strong> sequences of characters. Index starts at <strong>0</strong>.<br><br>
+            <strong>length</strong>           → character count<br>
+            <strong>toUpperCase/toLowerCase</strong> → case<br>
+            <strong>trim()</strong>            → remove edge whitespace<br>
+            <strong>includes(s)</strong>       → true/false check<br>
+            <strong>indexOf(s)</strong>        → position (-1 if missing)<br>
+            <strong>slice(start, end)</strong> → extract substring<br>
+            <strong>split(sep)</strong>        → string → array<br>
+            <strong>replace/replaceAll</strong>→ swap text<br>
+            <strong>split("")</strong>         → char array (key DSA trick)
+        `,
+                code:
+                    `const s = "  Hello, World!  ";
+console.log(s.length);               // 18
+console.log(s.trim());               // "Hello, World!"
+console.log(s.trim().toLowerCase()); // "hello, world!"
+console.log(s.includes("World"));   // true
+console.log(s.indexOf("o"));        // 5
+
+const clean = "Hello, World!";
+console.log(clean.slice(0, 5));     // "Hello"
+console.log(clean.slice(-6));       // "orld!"
+console.log(clean.split(", "));     // ["Hello","World!"]
+console.log(clean.replace("World","DSA")); // "Hello, DSA!"
+
+// DSA trick: reverse a string
+const rev = "hello".split("").reverse().join("");
+console.log(rev);                   // "olleh"`,
+                output:
+                    `18
+"Hello, World!"
+"hello, world!"
+true
+5
+"Hello"
+"orld!"
+["Hello", "World!"]
+"Hello, DSA!"
+"olleh"
+
+split("") → char array:  ["h","e","l","l","o"]
+Used in: palindrome, anagram, sliding window`
+            },
+            {
+                title: "Destructuring &amp; Spread / Rest",
+                concept: `
+            <strong>Destructuring</strong> — unpack arrays/objects into variables in one line.<br>
+            <strong>Spread (...)</strong>   — expand an array/object into individual items.<br>
+            <strong>Rest (...)</strong>     — collect remaining items into an array.<br><br>
+            Same <code>...</code> syntax, different context:<br>
+            → In a call / literal &nbsp; = <strong>spread</strong> (expand outward)<br>
+            → In a parameter / left-side = <strong>rest</strong> (gather inward)
+            <p>Classic swap trick: <code>[a, b] = [b, a]</code> — no temp variable needed. Used in bubble sort, two-pointer.</p>
+        `,
+                code:
+                    `// Array destructuring
+const [a, b, c] = [10, 20, 30];
+console.log(a, b, c);           // 10 20 30
+
+// Swap without temp variable
+let x = 1, y = 2;
+[x, y] = [y, x];
+console.log(x, y);              // 2 1
+
+// Object destructuring
+const { name, age } = { name: "Bob", age: 22, city: "Pune" };
+console.log(name, age);         // Bob 22
+
+// Spread — merge arrays
+const arr1 = [1, 2], arr2 = [3, 4];
+console.log([...arr1, ...arr2]);// [1,2,3,4]
+
+// Spread — copy + extend object
+const base = { x: 1 };
+console.log({ ...base, y: 2 }); // { x:1, y:2 }
+
+// Rest — gather remaining args
+function sum(first, ...rest) {
+  return rest.reduce((a, b) => a + b, first);
+}
+console.log(sum(1, 2, 3, 4));  // 10`,
+                output:
+                    `10 20 30
+2 1
+Bob 22
+[1, 2, 3, 4]
+{ x: 1, y: 2 }
+10
+
+[a,b]=[b,a] swap used in:
+  - bubble sort passes
+  - two-pointer approach`
+            },
+            {
+                title: "Ternary &amp; Short-circuit Operators",
+                concept: `
+            Compact inline logic — alternatives to if/else for simple decisions.<br><br>
+            <strong>Ternary:</strong> &nbsp;<code>condition ? ifTrue : ifFalse</code><br><br>
+            <strong>&amp;&amp;</strong> (AND) → return first falsy, else last value<br>
+            <strong>||</strong> (OR) &nbsp;&nbsp;→ return first truthy, else last value<br>
+            <strong>??</strong> (Nullish) → use right side only if left is <strong>null</strong> or <strong>undefined</strong><br>
+            <strong>?.</strong> (Optional chain) → safely access nested properties
+            <p>Use <strong>??</strong> instead of <strong>||</strong> when
+            <code>0</code> or <code>""</code> are valid values you don't want replaced.</p>
+        `,
+                code:
+                    `const age = 20;
+const label = age >= 18 ? "adult" : "minor";
+console.log(label);              // "adult"
+
+// && guard — only go further if truthy
+const user = { name: "Alice" };
+console.log(user && user.name);  // "Alice"
+console.log(null && "hello");    // null (short-circuits)
+
+// || default value
+const input = "";
+console.log(input || "default"); // "default" ⚠ 0 also triggers
+
+// ?? nullish coalescing
+const count = 0;
+console.log(count || "N/A");     // "N/A"  ⚠ 0 is falsy
+console.log(count ?? "N/A");     // 0      ✔ 0 is not null/undefined
+
+// ?. optional chaining
+const data = null;
+console.log(data?.name);         // undefined (no crash)`,
+                output:
+                    `"adult"
+"Alice"
+null
+"default"
+"N/A"
+0
+undefined
+
+Rule:
+  ||  → 0 and "" mean "no value"
+  ??  → only null/undefined mean "no value"`
+            },
+            {
+                title: "Switch Statement",
+                concept: `
+            <strong>switch</strong> matches one value against multiple cases.<br>
+            Cleaner than a long if/else if chain when checking the same variable.<br><br>
+            <strong>break</strong>   → exit after the matched case (required!)<br>
+            <strong>default</strong> → runs when no case matches (like else)<br>
+            <strong>Fall-through</strong> → omitting break lets execution continue into next case
+            <p>switch uses <strong>strict equality ===</strong> for matching.</p>
+            <p>For simple key → value lookups an <strong>object map</strong> is often faster to write.</p>
+        `,
+                code:
+                    `const day = 3;
+switch (day) {
+  case 1: console.log("Monday");    break;
+  case 2: console.log("Tuesday");   break;
+  case 3: console.log("Wednesday"); break;
+  case 6:
+  case 7: console.log("Weekend!");  break; // fall-through
+  default: console.log("Other");
+}
+
+// Object map — same thing, less code
+const dayName = {1:"Mon",2:"Tue",3:"Wed",
+                 4:"Thu",5:"Fri",6:"Sat",7:"Sun"};
+console.log(dayName[day] ?? "Unknown"); // "Wed"
+
+const grade = "B";
+switch (grade) {
+  case "A": console.log("Excellent"); break;
+  case "B": console.log("Good");      break;
+  default:  console.log("Keep going");
+}`,
+                output:
+                    `Wednesday
+Wed
+Good
+
+Tip: object map is O(1) lookup
+     and easier to maintain:
+  const map = { 1:"Mon", ... };
+  map[day]   ← clean and fast`
+            },
+            {
+                title: "Scope &amp; Closures",
+                concept: `
+            <strong>Scope</strong> = where a variable can be accessed.<br><br>
+            <strong>Global scope</strong>   → accessible everywhere<br>
+            <strong>Function scope</strong> → only inside that function (var)<br>
+            <strong>Block scope</strong>    → only inside { } (let, const)<br><br>
+            <strong>Closure</strong> — an inner function that <em>remembers</em> variables
+            from its outer function even after the outer function has finished.
+            <p>Closures power: memoization, counters, module pattern —
+            all common in DSA solutions.</p>
+        `,
+                code:
+                    `// Block scope
+let x = "global";
+{
+  let x = "block";
+  console.log(x);      // "block"
+}
+console.log(x);        // "global"
+
+// Closure — counter that remembers state
+function makeCounter() {
+  let count = 0;
+  return function() { return ++count; };
+}
+const c = makeCounter();
+console.log(c()); // 1
+console.log(c()); // 2
+console.log(c()); // 3
+
+// Closure — memoization (cache results)
+function memoize(fn) {
+  const cache = {};
+  return function(n) {
+    if (n in cache) return cache[n];
+    return (cache[n] = fn(n));
+  };
+}
+const double = memoize(n => n * 2);
+console.log(double(5));  // 10 — computed
+console.log(double(5));  // 10 — from cache`,
+                output:
+                    `block
+global
+1
+2
+3
+10
+10
+
+Closure keeps "count" alive
+even after makeCounter() returned.
+
+Memoize: each input computed once,
+  then O(1) on repeat calls — critical
+  optimization for recursive DSA problems`
+            },
+            {
+                title: "Math Object — Essential Methods",
+                concept: `
+            The built-in <strong>Math</strong> object has maths utilities used constantly in DSA.<br><br>
+            <strong>Math.floor(x)</strong>     → round down<br>
+            <strong>Math.ceil(x)</strong>      → round up<br>
+            <strong>Math.round(x)</strong>     → round nearest<br>
+            <strong>Math.abs(x)</strong>       → absolute value<br>
+            <strong>Math.max(a,b,...)</strong>  → largest value<br>
+            <strong>Math.min(a,b,...)</strong>  → smallest value<br>
+            <strong>Math.pow(b,e)</strong>      → b to power e  (same as b**e)<br>
+            <strong>Math.sqrt(x)</strong>       → square root<br>
+            <strong>Math.trunc(x)</strong>      → remove decimal part<br>
+            <strong>Math.random()</strong>      → random float 0 to &lt;1
+        `,
+                code:
+                    `console.log(Math.floor(4.9));   // 4
+console.log(Math.ceil(4.1));    // 5
+console.log(Math.round(4.5));   // 5
+console.log(Math.abs(-7));      // 7
+console.log(Math.max(3, 9, 1)); // 9
+console.log(Math.min(3, 9, 1)); // 1
+console.log(Math.pow(2, 10));   // 1024
+console.log(Math.sqrt(144));    // 12
+console.log(Math.trunc(-4.9));  // -4
+
+// Random integer between min and max (inclusive)
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+console.log(randInt(1, 6));     // dice roll
+
+// Spread with Math.max on an array
+const arr = [3, 7, 2, 9, 1];
+console.log(Math.max(...arr));  // 9`,
+                output:
+                    `4
+5
+5
+7
+9
+1
+1024
+12
+-4
+4  (random each run)
+9
+
+DSA uses:
+  Math.floor(n/2)  → binary search midpoint
+  Math.abs(a - b)  → distance / difference
+  Math.sqrt(n)     → check factors up to √n`
+            },
+            {
+                title: "Big O Notation — Time &amp; Space Complexity",
+                concept: `
+            <strong>Big O</strong> describes how cost scales as input size <strong>n</strong> grows.<br><br>
+            <strong>O(1)</strong>       → constant &nbsp;&nbsp;&nbsp;— same time for any n<br>
+            <strong>O(log n)</strong>   → logarithmic — halves the problem each step<br>
+            <strong>O(n)</strong>       → linear &nbsp;&nbsp;&nbsp;&nbsp;— one pass through input<br>
+            <strong>O(n log n)</strong> → efficient sort (merge sort, quick sort)<br>
+            <strong>O(n²)</strong>      → quadratic &nbsp;&nbsp;— nested loops, avoid for large n<br>
+            <strong>O(2ⁿ)</strong>      → exponential &nbsp;— recursion without memoization
+            <p><strong>Space complexity</strong> = extra memory used by the algorithm.</p>
+            <p>Goal: best balance of time and space for the given constraints.</p>
+        `,
+                code:
+                    `// O(1) — constant time
+function getFirst(arr) { return arr[0]; }
+
+// O(n) — linear scan
+function linearSearch(arr, t) {
+  for (let i = 0; i < arr.length; i++)
+    if (arr[i] === t) return i;
+  return -1;
+}
+
+// O(n²) — nested loops, slow for large n
+function hasDuplicate_slow(arr) {
+  for (let i = 0; i < arr.length; i++)
+    for (let j = i+1; j < arr.length; j++)
+      if (arr[i] === arr[j]) return true;
+  return false;
+}
+
+// O(n) — same result using a Set
+function hasDuplicate_fast(arr) {
+  const seen = new Set();
+  for (const x of arr) {
+    if (seen.has(x)) return true;
+    seen.add(x);
+  }
+  return false;
+}`,
+                output:
+                    `Complexity  | n=100  | n=10,000
+O(1)        | 1      | 1
+O(log n)    | 7      | 13
+O(n)        | 100    | 10,000
+O(n log n)  | 700    | 130,000
+O(n²)       | 10,000 | 100,000,000 ← avoid
+
+hasDuplicate:
+  O(n²) → 100M ops for n=10k
+  O(n)  →  10k ops for n=10k
+
+Always ask: "can I avoid the nested loop?"`
+            },
+        ];
+
+
+        // ════════════════════════════════════════════════════════════════
+        //  STATE
+        // ════════════════════════════════════════════════════════════════
+        const LS_KEY = 'dsa_topics_v2';
+        let topics = JSON.parse(localStorage.getItem(LS_KEY)) || [...DEFAULT_TOPICS];
+        let activeIdx = 'all';
+        let fileHandle = null;    // File System Access API handle
+
+
+        // ════════════════════════════════════════════════════════════════
+        //  RENDERER
+        // ════════════════════════════════════════════════════════════════
+        function esc(s) {
+            return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        const DOTS = '<div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>';
+
+        function buildCard(t) {
+            return `
+    <div class="col-12">
+        <div class="topic-card">
+            <div class="topic-header">${t.title}</div>
+            <div class="content">
+                <div class="row g-3 align-items-stretch">
+                    <div class="col-md-4">
+                        <div class="panel h-100">
+                            <div class="panel-head"><span>&#128161; Concept</span>${DOTS}</div>
+                            <div class="concept-text">${t.concept}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="panel h-100">
+                            <div class="panel-head"><span>&#128196; Code</span>${DOTS}</div>
+                            <div class="code">${esc(t.code)}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="panel h-100">
+                            <div class="panel-head"><span>&#128187; Output</span>${DOTS}</div>
+                            <div class="terminal">${esc(t.output)}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+        }
+
+        function renderTopics() {
+            const list = activeIdx === 'all' ? topics : [topics[activeIdx]];
+            document.getElementById('topics-container').innerHTML = list.map(buildCard).join('');
+        }
+
+        function renderChips() {
+            let html = `<button class="chip ${activeIdx === 'all' ? 'active' : ''}"
+                        onclick="setFilter('all')">All Topics</button>`;
+            topics.forEach((t, i) => {
+                html += `<button class="chip ${activeIdx === i ? 'active' : ''}"
+                         onclick="setFilter(${i})">${t.title}</button>`;
+            });
+            document.getElementById('chipsNav').innerHTML = html;
+        }
+
+        function setFilter(idx) {
+            activeIdx = idx;
+            renderChips();
+            renderTopics();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function render() {
+            renderChips();
+            renderTopics();
+        }
+
+
+        // ════════════════════════════════════════════════════════════════
+        //  LOCAL STORAGE
+        // ════════════════════════════════════════════════════════════════
+        function saveLocal() {
+            localStorage.setItem(LS_KEY, JSON.stringify(topics));
+        }
+
+
+        // ════════════════════════════════════════════════════════════════
+        //  FILE SYSTEM ACCESS API  — read & write topics.json
+        // ════════════════════════════════════════════════════════════════
+        const FILE_OPTS = {
+            types: [{ description: 'JSON file', accept: { 'application/json': ['.json'] } }],
+            excludeAcceptAllOption: true
+        };
+
+        // 📂 Open — pick topics.json from disk and load it
+        document.getElementById('openFileBtn').addEventListener('click', async () => {
+            if (!('showOpenFilePicker' in window)) {
+                toast('File System API not supported in this browser. Use Chrome or Edge.', 'warn');
+                return;
+            }
+            try {
+                [fileHandle] = await window.showOpenFilePicker({ ...FILE_OPTS, multiple: false });
+                const file = await fileHandle.getFile();
+                const parsed = JSON.parse(await file.text());
+                if (!Array.isArray(parsed)) throw new Error('Not a valid topics JSON array');
+                topics = parsed;
+                activeIdx = 'all';
+                saveLocal();
+                render();
+                toast(`Loaded ${topics.length} topics from ${file.name}`);
+            } catch (e) {
+                if (e.name !== 'AbortError') toast('Could not open file: ' + e.message, 'warn');
+            }
+        });
+
+        // 💾 Save — write current topics back to topics.json
+        document.getElementById('saveFileBtn').addEventListener('click', async () => {
+            if (!('showSaveFilePicker' in window)) {
+                // Fallback: trigger download
+                downloadJSON();
+                return;
+            }
+            try {
+                if (!fileHandle) {
+                    fileHandle = await window.showSaveFilePicker({
+                        ...FILE_OPTS,
+                        suggestedName: 'topics.json'
+                    });
+                }
+                const writable = await fileHandle.createWritable();
+                await writable.write(JSON.stringify(topics, null, 2));
+                await writable.close();
+                toast(`Saved ${topics.length} topics to topics.json`);
+            } catch (e) {
+                if (e.name !== 'AbortError') toast('Save failed: ' + e.message, 'warn');
+            }
+        });
+
+        function downloadJSON() {
+            const blob = new Blob([JSON.stringify(topics, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'topics.json';
+            a.click();
+            URL.revokeObjectURL(a.href);
+            toast('Downloaded topics.json');
+        }
+
+
+        // ════════════════════════════════════════════════════════════════
+        //  FORM — add a new topic
+        // ════════════════════════════════════════════════════════════════
+        function openModal() { document.getElementById('formModal').classList.add('open'); }
+        function closeModal() {
+            document.getElementById('formModal').classList.remove('open');
+            document.getElementById('topicForm').reset();
+        }
+
+        document.getElementById('openFormBtn').addEventListener('click', openModal);
+        document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+        document.getElementById('cancelFormBtn').addEventListener('click', closeModal);
+        document.getElementById('formModal').addEventListener('click', e => {
+            if (e.target === e.currentTarget) closeModal();
+        });
+
+        document.getElementById('topicForm').addEventListener('submit', e => {
+            e.preventDefault();
+            const title = document.getElementById('f-title').value.trim();
+            const concept = document.getElementById('f-concept').value.trim();
+            const code = document.getElementById('f-code').value.trim();
+            const output = document.getElementById('f-output').value.trim();
+
+            if (!title) return;
+
+            topics.push({ title, concept, code, output });
+            saveLocal();
+
+            activeIdx = topics.length - 1;   // jump to the new topic
+            render();
+            closeModal();
+            toast(`"${title}" added! Click 💾 Save JSON to persist it to file.`);
+        });
+
+
+        // ════════════════════════════════════════════════════════════════
+        //  TOAST
+        // ════════════════════════════════════════════════════════════════
+        let toastTimer;
+        function toast(msg, type = 'ok') {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.className = 'toast show ' + type;
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
+        }
+
+
+        // ════════════════════════════════════════════════════════════════
+        //  INIT
+        // ════════════════════════════════════════════════════════════════
+        render();
+    </script>
+
+</body>
+
+</html>
