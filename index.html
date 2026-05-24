@@ -141,7 +141,7 @@ console.log(a + b);              // 15
 
 let x = "10", y = "5";
 console.log(x + y);              // "105"
-
+console.log("the sum of a and b is " + a + b) 
 // Fix: convert string → number first
 console.log(Number(x) + Number(y));     // 15
 console.log(parseInt(x) + parseInt(y)); // 15`,
@@ -151,9 +151,13 @@ console.log(parseInt(x) + parseInt(y)); // 15`,
 15
 15
 
+Note: The sum of a and b is 105" — because + with string converts numbers to strings, so "the sum of a and b is " + a becomes "the sum of a and b is 10", then + b adds "5" to the end, giving "the sum of a and b is 105.
+                
 ✔ number + number = addition
 ✔ string + string = concatenation
 ✔ Number() / parseInt() to convert
+
+
 
 Tip: always check types before adding`
             },
